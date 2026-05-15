@@ -1,7 +1,38 @@
+from google.oauth2 import service_account
+
+from googleapiclient.discovery import build
+
+from googleapiclient.http import MediaFileUpload
 import streamlit as st
 import pandas as pd
 import os
-import hashlib
+import io
+SCOPES = [
+    "https://www.googleapis.com/auth/drive"
+]
+
+SERVICE_ACCOUNT_FILE = (
+    "google_drive.json"
+)
+
+FOLDER_ID = (
+    "1vMT6gXgMU4TymjXiodWgoJC5murwCFgI"
+)
+
+credentials = (
+    service_account.Credentials
+    .from_service_account_file(
+        SERVICE_ACCOUNT_FILE,
+        scopes=SCOPES
+    )
+)
+
+drive_service = build(
+    "drive",
+    "v3",
+    credentials=credentials
+)
+
 from datetime import datetime
 
 # =========================
@@ -198,26 +229,35 @@ menu = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.markdown("## 📂 Excel maestro")
 
-archivo = st.sidebar.file_uploader(
-    "Cargar archivo Excel",
-    type=["xlsx"]
+EXCEL_FILE_ID = (
+    "1cKS4CA5m7m_aQ3ncWQ9Gl3WOZHAKXVp3"
 )
 
+excel_request = (
+    drive_service.files()
+    .get_media(
+        fileId=EXCEL_FILE_ID
+    )
+)
+
+excel_data = (
+    excel_request.execute()
+)
+
+archivo_excel = io.BytesIO(
+    excel_data
+)
 # =========================
 # VALIDACIÓN
 # =========================
 
-if archivo is None:
-
-    st.warning("⬅ Carga el Excel maestro.")
-    st.stop()
 
 # =========================
 # LEER EXCEL
 # =========================
 
 df = pd.read_excel(
-    archivo
+    archivo_excel
 )
 
 df.columns = (
@@ -328,12 +368,6 @@ if menu == "🏠 Dashboard":
     completos = (
         df["ESTATUS"]
         .str.contains("Completo")
-        .sum()
-    )
-
-    en_correccion = (
-        df["ESTATUS"]
-        .str.contains("En corrección")
         .sum()
     )
 
@@ -484,17 +518,7 @@ if menu == "📍 Entidades":
             idx,
             "OBSERVACIONES DASHBOARD"
         ] = observacion
-
-        ruta = (
-            "excel_maestro/"
-            "inventario_actualizado.xlsx"
-        )
-
-        df.to_excel(
-            ruta,
-            index=False
-        )
-
+	
         st.success(
             "Observación guardada correctamente."
         )
@@ -575,17 +599,6 @@ if menu == "📎 Documentos":
 
     if archivo_doc and fecha_oficio:
 
-        carpeta = os.path.join(
-            "documentos",
-            entidad_doc,
-            str(clues_doc)
-        )
-
-        os.makedirs(
-            carpeta,
-            exist_ok=True
-        )
-
         nombre_limpio = (
             tipo_doc
             .replace("🟢", "")
@@ -604,11 +617,6 @@ if menu == "📎 Documentos":
             "%Y-%m-%d"
         )
 
-        extension = (
-            archivo_doc.name
-            .split(".")[-1]
-        )
-
         nombre_original = (
             archivo_doc.name
             .replace(" ", "_")
@@ -622,13 +630,13 @@ if menu == "📎 Documentos":
             + nombre_original
         )
 
-        ruta = os.path.join(
-            carpeta,
-            nombre
+        temp_path = (
+            "temp_"
+            + archivo_doc.name
         )
 
         with open(
-            ruta,
+            temp_path,
             "wb"
         ) as f:
 
@@ -636,104 +644,45 @@ if menu == "📎 Documentos":
                 archivo_doc.getbuffer()
             )
 
-        st.success(
-            "✅ Documento cargado correctamente"
+        file_metadata = {
+            "name": nombre,
+            "parents": [FOLDER_ID]
+        }
+
+        media = MediaFileUpload(
+            temp_path,
+            resumable=True
         )
+
+        uploaded_file = (
+            drive_service.files()
+            .create(
+                body=file_metadata,
+                media_body=media,
+                fields="id, webViewLink"
+            )
+            .execute()
+        )
+
+        drive_link = (
+            uploaded_file
+            .get("webViewLink")
+        )
+
+        os.remove(
+            temp_path
+        )
+
+        st.success(
+            "✅ Documento cargado a Google Drive"
+        )
+
+        st.markdown(
+            f"[📂 Abrir documento]({drive_link})"
+        )
+
     elif archivo_doc and not fecha_oficio:
 
         st.warning(
             "⚠ Selecciona la fecha del oficio."
-        )
-    # =========================
-    # EXPEDIENTE
-    # =========================
-
-    st.markdown(
-        "## 📂 Expediente documental"
-    )
-
-    carpeta_actual = os.path.join(
-        "documentos",
-        entidad_doc,
-        str(clues_doc)
-    )
-
-    if os.path.exists(
-        carpeta_actual
-    ):
-
-        archivos = os.listdir(
-            carpeta_actual
-        )
-
-        if len(archivos) > 0:
-
-            for archivo in archivos:
-
-                ruta_archivo = os.path.join(
-                    carpeta_actual,
-                    archivo
-                )
-
-                st.markdown(f"""
-                <div style="
-                    background:white;
-                    padding:18px;
-                    border-radius:14px;
-                    margin-bottom:12px;
-                    border-left:8px solid #235B4E;
-                    box-shadow:0 2px 8px rgba(0,0,0,0.08);
-                ">
-                    <h4 style="
-                        margin-bottom:10px;
-                    ">
-                    📄 {archivo}
-                    </h4>
-                </div>
-                """, unsafe_allow_html=True)
-
-                c1, c2 = st.columns([1,1])
-
-                with c1:
-
-                    with open(
-                        ruta_archivo,
-                        "rb"
-                    ) as file:
-
-                        st.download_button(
-                            label="⬇ Descargar",
-                            data=file,
-                            file_name=archivo,
-                            mime="application/octet-stream",
-                            use_container_width=True
-                        )
-
-                with c2:
-
-                    if st.button(
-                        "🗑 Eliminar",
-                        key=archivo,
-                        use_container_width=True
-                    ):
-
-                        os.remove(
-                            ruta_archivo
-                        )
-
-                        st.success(
-                            "Documento eliminado."
-                        )
-
-                        st.rerun()
-        else:
-
-            st.warning(
-                "No existen documentos."
-            )
-
-    else:
-
-        st.warning(
-            "No existe expediente documental."
         )
