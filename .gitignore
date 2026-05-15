@@ -1,0 +1,6 @@
+documentos/
+excel_maestro/
+__pycache__/
+*.xlsx
+*.pdf
+*.txt
