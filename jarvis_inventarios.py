@@ -227,7 +227,6 @@ menu = st.sidebar.radio(
 # =========================
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("## 📂 Excel maestro")
 
 EXCEL_FILE_ID = (
     "1cKS4CA5m7m_aQ3ncWQ9Gl3WOZHAKXVp3"
