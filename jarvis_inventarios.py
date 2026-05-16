@@ -803,15 +803,7 @@ if menu == "📎 Documentos":
                         )
 
                         st.rerun()
-                  as file:
 
-                    st.download_button(
-                        label=f"📂 Abrir {row['Archivo']}",
-                        data=file,
-                        file_name=row["Archivo"],
-                        mime="application/pdf",
-                        key=i
-                    )
     elif archivo_doc and not fecha_oficio:
 
         st.warning(
