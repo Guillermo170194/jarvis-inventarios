@@ -645,26 +645,27 @@ if menu == "📎 Documentos":
             + nombre_original
         )
 
-resultado = (
-    cloudinary.uploader.upload(
-        archivo_doc,
-        resource_type="raw",
-        folder="jarvis_documentos",
-        public_id=nombre
-    )
-)
+        resultado = (
+            cloudinary.uploader.upload(
+                archivo_doc,
+                resource_type="raw",
+                folder="jarvis_documentos",
+                public_id=nombre
+            )
+        )
 
-archivo_url = (
-    resultado["secure_url"]
-)
+        archivo_url = (
+            resultado["secure_url"]
+        )
 
-st.success(
-    "✅ Documento cargado correctamente"
-)
+        st.success(
+            "✅ Documento cargado correctamente"
+        )
 
-st.markdown(
-    f"[📂 Abrir documento]({archivo_url})"
-)
+        st.markdown(
+            f"[📂 Abrir documento]({archivo_url})"
+        )
+
     elif archivo_doc and not fecha_oficio:
 
         st.warning(
