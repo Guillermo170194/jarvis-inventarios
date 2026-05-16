@@ -36,7 +36,9 @@ drive_service = build(
 )
 
 from datetime import datetime
-
+REGISTRO_DOCS = (
+    "registro_documentos.xlsx"
+)
 # =========================
 # CONFIGURACIÓN
 # =========================
@@ -665,6 +667,80 @@ if menu == "📎 Documentos":
         st.code(
             ruta_archivo
         )
+        nuevo_registro = pd.DataFrame([
+            {
+                "Entidad": entidad_doc,
+                "CLUES": clues_doc,
+                "Tipo": tipo_doc,
+                "Fecha oficio": fecha_doc,
+                "Archivo": nombre,
+                "Ruta": ruta_archivo
+            }
+        ])
+
+        if os.path.exists(
+            REGISTRO_DOCS
+        ):
+
+            historial = pd.read_excel(
+                REGISTRO_DOCS
+            )
+
+            historial = pd.concat(
+                [
+                    historial,
+                    nuevo_registro
+                ],
+                ignore_index=True
+            )
+
+        else:
+
+            historial = nuevo_registro
+
+        historial.to_excel(
+            REGISTRO_DOCS,
+            index=False
+        )
+    st.markdown(
+        "## 📚 Expediente documental"
+    )
+
+    if os.path.exists(
+        REGISTRO_DOCS
+    ):
+
+        historial_docs = pd.read_excel(
+            REGISTRO_DOCS
+        )
+
+        historial_docs = historial_docs[
+            historial_docs["CLUES"]
+            == clues_doc
+        ]
+
+        if len(historial_docs) > 0:
+
+            st.dataframe(
+                historial_docs,
+                use_container_width=True,
+                hide_index=True
+            )
+
+            for i, row in historial_docs.iterrows():
+
+                with open(
+                    row["Ruta"],
+                    "rb"
+                ) as file:
+
+                    st.download_button(
+                        label=f"📂 Abrir {row['Archivo']}",
+                        data=file,
+                        file_name=row["Archivo"],
+                        mime="application/pdf",
+                        key=i
+                    )
     elif archivo_doc and not fecha_oficio:
 
         st.warning(
