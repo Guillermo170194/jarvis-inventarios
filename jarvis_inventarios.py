@@ -654,19 +654,19 @@ if menu == "📎 Documentos":
             )
         )
 
-	archivo_url = (
-    	resultado["secure_url"]
-    	.replace(
-        	"/upload/",
-        	"/upload/fl_attachment/"
-    	)
-)
+        archivo_url = (
+            resultado["secure_url"]
+            .replace(
+                "/upload/",
+                "/upload/fl_attachment/"
+            )
+        )
 
         st.success(
             "✅ Documento cargado correctamente"
         )
 
-        st.markdown(
+        st.link_button(
             "📂 Descargar documento",
             archivo_url
         )
