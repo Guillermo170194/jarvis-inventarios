@@ -1,4 +1,6 @@
-
+from pdf2image import convert_from_bytes
+import cloudinary
+import cloudinary.uploader
 from google.oauth2 import service_account
 
 from googleapiclient.discovery import build
@@ -8,6 +10,17 @@ import streamlit as st
 import pandas as pd
 import os
 import io
+cloudinary.config(
+    cloud_name=os.environ[
+        "CLOUDINARY_CLOUD_NAME"
+    ],
+    api_key=os.environ[
+        "CLOUDINARY_API_KEY"
+    ],
+    api_secret=os.environ[
+        "CLOUDINARY_API_SECRET"
+    ]
+)
 SCOPES = [
     "https://www.googleapis.com/auth/drive"
 ]
@@ -629,6 +642,43 @@ if menu == "📎 Documentos":
             "jpg"
         ]
     )
+        preview_url = ""
+
+        if archivo_doc.name.lower().endswith(
+            ".pdf"
+        ):
+
+            paginas = convert_from_bytes(
+                archivo_doc.getvalue(),
+                first_page=1,
+                last_page=1
+            )
+
+            imagen = paginas[0]
+
+            temp_img = (
+                "preview.png"
+            )
+
+            imagen.save(
+                temp_img,
+                "PNG"
+            )
+
+            resultado = (
+                cloudinary.uploader.upload(
+                    temp_img,
+                    folder="jarvis_previews"
+                )
+            )
+
+            preview_url = (
+                resultado["secure_url"]
+            )
+
+            os.remove(
+                temp_img
+            )
 
     if archivo_doc and fecha_oficio:
 
@@ -689,6 +739,7 @@ if menu == "📎 Documentos":
             )
 
         st.success(
+
             "✅ Documento guardado correctamente"
         )
 
@@ -707,7 +758,12 @@ if menu == "📎 Documentos":
                 "Ruta": ruta_archivo
             }
         ])
+        if preview_url:
 
+            st.image(
+                preview_url,
+                caption="Vista previa documento"
+            )
         if os.path.exists(
             REGISTRO_DOCS
         ):
