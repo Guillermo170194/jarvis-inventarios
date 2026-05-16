@@ -648,28 +648,21 @@ if menu == "📎 Documentos":
         resultado = (
             cloudinary.uploader.upload(
                 archivo_doc,
-                resource_type="raw",
+                resource_type="auto",
                 folder="jarvis_documentos",
                 public_id=nombre
             )
         )
 
-        archivo_url = resultado[
-            "secure_url"
-        ]
+        archivo_url = resultado["secure_url"]
 
         st.success(
             "✅ Documento cargado correctamente"
         )
 
-        st.markdown(
-            f"""
-            <a href="{archivo_url}" target="_blank">
-                📂 Abrir documento
-            </a>
-            """,
-            unsafe_allow_html=True
-        )
+        st.write("📂 Documento disponible:")
+
+        st.write(archivo_url)
 
     elif archivo_doc and not fecha_oficio:
 
