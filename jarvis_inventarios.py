@@ -1,3 +1,7 @@
+import cloudinary
+
+import cloudinary.uploader
+
 from google.oauth2 import service_account
 
 from googleapiclient.discovery import build
@@ -32,6 +36,17 @@ drive_service = build(
     "drive",
     "v3",
     credentials=credentials
+)
+cloudinary.config(
+    cloud_name=os.environ[
+        "CLOUDINARY_CLOUD_NAME"
+    ],
+    api_key=os.environ[
+        "CLOUDINARY_API_KEY"
+    ],
+    api_secret=os.environ[
+        "CLOUDINARY_API_SECRET"
+    ]
 )
 
 from datetime import datetime
@@ -630,57 +645,26 @@ if menu == "📎 Documentos":
             + nombre_original
         )
 
-        temp_path = (
-            "temp_"
-            + archivo_doc.name
-        )
+resultado = (
+    cloudinary.uploader.upload(
+        archivo_doc,
+        resource_type="raw",
+        folder="jarvis_documentos",
+        public_id=nombre
+    )
+)
 
-        with open(
-            temp_path,
-            "wb"
-        ) as f:
+archivo_url = (
+    resultado["secure_url"]
+)
 
-            f.write(
-                archivo_doc.getbuffer()
-            )
+st.success(
+    "✅ Documento cargado correctamente"
+)
 
-        file_metadata = {
-            "name": nombre,
-            "parents": [FOLDER_ID]
-        }
-
-        media = MediaFileUpload(
-            temp_path,
-            resumable=True
-        )
-
-        uploaded_file = (
-            drive_service.files()
-            .create(
-                body=file_metadata,
-                media_body=media,
-                fields="id, webViewLink"
-            )
-            .execute()
-        )
-
-        drive_link = (
-            uploaded_file
-            .get("webViewLink")
-        )
-
-        os.remove(
-            temp_path
-        )
-
-        st.success(
-            "✅ Documento cargado a Google Drive"
-        )
-
-        st.markdown(
-            f"[📂 Abrir documento]({drive_link})"
-        )
-
+st.markdown(
+    f"[📂 Abrir documento]({archivo_url})"
+)
     elif archivo_doc and not fecha_oficio:
 
         st.warning(
