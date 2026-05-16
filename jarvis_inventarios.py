@@ -484,6 +484,36 @@ if menu == "📍 Entidades":
         use_container_width=True,
         hide_index=True
     )
+    st.markdown(
+        "## 📚 Expediente documental"
+    )
+
+    if os.path.exists(
+        REGISTRO_DOCS
+    ):
+
+        historial_entidad = pd.read_excel(
+            REGISTRO_DOCS
+        )
+
+        historial_entidad = historial_entidad[
+            historial_entidad["Entidad"]
+            == estado_sel
+        ]
+
+        if len(historial_entidad) > 0:
+
+            st.dataframe(
+                historial_entidad,
+                use_container_width=True,
+                hide_index=True
+            )
+
+        else:
+
+            st.info(
+                "No hay documentos cargados."
+            )
 
     st.markdown(
         "## 📝 Observaciones"
@@ -729,10 +759,51 @@ if menu == "📎 Documentos":
 
             for i, row in historial_docs.iterrows():
 
-                with open(
-                    row["Ruta"],
-                    "rb"
-                ) as file:
+                c1, c2 = st.columns([8,1])
+
+                with c1:
+
+                    with open(
+                        row["Ruta"],
+                        "rb"
+                    ) as file:
+
+                        st.download_button(
+                            label=f"📂 {row['Archivo']}",
+                            data=file,
+                            file_name=row["Archivo"],
+                            mime="application/pdf",
+                            key=f"down_{i}"
+                        )
+
+                with c2:
+
+                    if st.button(
+                        "🗑",
+                        key=f"del_{i}"
+                    ):
+
+                        if os.path.exists(
+                            row["Ruta"]
+                        ):
+
+                            os.remove(
+                                row["Ruta"]
+                            )
+
+                        historial_docs = historial_docs.drop(i)
+
+                        historial_docs.to_excel(
+                            REGISTRO_DOCS,
+                            index=False
+                        )
+
+                        st.success(
+                            "Documento eliminado."
+                        )
+
+                        st.rerun()
+                  as file:
 
                     st.download_button(
                         label=f"📂 Abrir {row['Archivo']}",
