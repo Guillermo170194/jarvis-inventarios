@@ -657,6 +657,7 @@ if menu == "📎 Documentos":
         archivo_url = (
             resultado["secure_url"]
         )
+        st.write(resultado)
 
         st.success(
             "✅ Documento cargado correctamente"
