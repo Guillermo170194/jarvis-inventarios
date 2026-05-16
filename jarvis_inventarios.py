@@ -572,6 +572,9 @@ if menu == "📍 Entidades":
 # DOCUMENTOS
 # =========================
 
+    if "ultimo_documento" not in st.session_state:
+
+        st.session_state.ultimo_documento = ""
 if menu == "📎 Documentos":
 
     st.markdown(
@@ -643,7 +646,12 @@ if menu == "📎 Documentos":
         ]
     )
 
-    if archivo_doc and fecha_oficio:
+        if (
+        archivo_doc
+        and fecha_oficio
+        and st.session_state.ultimo_documento
+        != archivo_doc.name
+    ):
 
         preview_url = ""
 
@@ -794,6 +802,9 @@ if menu == "📎 Documentos":
             REGISTRO_DOCS,
             index=False
         )
+        st.session_state.ultimo_documento = (
+            archivo_doc.name
+        )
     st.markdown(
         "## 📚 Expediente documental"
     )
@@ -865,6 +876,7 @@ if menu == "📎 Documentos":
                         )
 
                         st.rerun()
+                        st.session_state.ultimo_documento = ""
 
     elif archivo_doc and not fecha_oficio:
 
