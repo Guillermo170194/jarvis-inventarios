@@ -572,10 +572,14 @@ if menu == "📍 Entidades":
 # DOCUMENTOS
 # =========================
 
+if menu == "📎 Documentos":
+
     if "ultimo_documento" not in st.session_state:
 
         st.session_state.ultimo_documento = ""
-if menu == "📎 Documentos":
+
+    st.markdown(
+
 
     st.markdown(
         "## 📎 Gestor documental"
@@ -646,7 +650,7 @@ if menu == "📎 Documentos":
         ]
     )
 
-        if (
+    if (
         archivo_doc
         and fecha_oficio
         and st.session_state.ultimo_documento
@@ -875,8 +879,9 @@ if menu == "📎 Documentos":
                             "Documento eliminado."
                         )
 
-                        st.rerun()
                         st.session_state.ultimo_documento = ""
+
+                        st.rerun()
 
     elif archivo_doc and not fecha_oficio:
 
