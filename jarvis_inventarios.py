@@ -654,18 +654,21 @@ if menu == "📎 Documentos":
             )
         )
 
-        archivo_url = (
-            resultado["secure_url"]
-	    + "?dl=1"
-        )
-        st.write(resultado)
+	archivo_url = (
+    	resultado["secure_url"]
+    	.replace(
+        	"/upload/",
+        	"/upload/fl_attachment/"
+    	)
+)
 
         st.success(
             "✅ Documento cargado correctamente"
         )
 
         st.markdown(
-            f"[📂 Abrir documento]({archivo_url})"
+            "📂 Descargar documento",
+            archivo_url
         )
 
     elif archivo_doc and not fecha_oficio:
