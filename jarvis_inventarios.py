@@ -579,9 +579,6 @@ if menu == "📎 Documentos":
         st.session_state.ultimo_documento = ""
 
     st.markdown(
-
-
-    st.markdown(
         "## 📎 Gestor documental"
     )
 
