@@ -533,7 +533,7 @@ if menu == "📍 Entidades":
             idx,
             "OBSERVACIONES DASHBOARD"
         ] = observacion
-	
+
         st.success(
             "Observación guardada correctamente."
         )
@@ -674,7 +674,7 @@ if menu == "📎 Documentos":
             """,
             unsafe_allow_html=True
         )
-	    elif archivo_doc and not fecha_oficio:
+    elif archivo_doc and not fecha_oficio:
 
         st.warning(
             "⚠ Selecciona la fecha del oficio."
