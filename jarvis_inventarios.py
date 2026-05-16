@@ -10,6 +10,7 @@ import streamlit as st
 import pandas as pd
 import os
 import io
+import hashlib
 cloudinary.config(
     cloud_name=os.environ[
         "CLOUDINARY_CLOUD_NAME"
@@ -574,9 +575,10 @@ if menu == "📍 Entidades":
 
 if menu == "📎 Documentos":
 
-    if "ultimo_documento" not in st.session_state:
+    if "ultimo_hash" not in st.session_state:
 
-        st.session_state.ultimo_documento = ""
+        st.session_state.ultimo_hash = ""
+
 
     st.markdown(
         "## 📎 Gestor documental"
@@ -646,12 +648,19 @@ if menu == "📎 Documentos":
             "jpg"
         ]
     )
+    archivo_hash = ""
+
+    if archivo_doc:
+
+        archivo_hash = hashlib.md5(
+            archivo_doc.getvalue()
+        ).hexdigest()
 
     if (
         archivo_doc
         and fecha_oficio
-        and st.session_state.ultimo_documento
-        != archivo_doc.name
+        and st.session_state.ultimo_hash
+        != archivo_hash
     ):
 
         preview_url = ""
@@ -803,8 +812,8 @@ if menu == "📎 Documentos":
             REGISTRO_DOCS,
             index=False
         )
-        st.session_state.ultimo_documento = (
-            archivo_doc.name
+        st.session_state.ultimo_hash = (
+            archivo_hash
         )
     st.markdown(
         "## 📚 Expediente documental"
@@ -876,7 +885,7 @@ if menu == "📎 Documentos":
                             "Documento eliminado."
                         )
 
-                        st.session_state.ultimo_documento = ""
+                        st.session_state.ultimo_hash = ""
 
                         st.rerun()
 
