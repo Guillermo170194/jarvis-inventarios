@@ -674,6 +674,7 @@ if menu == "📎 Documentos":
             """,
             unsafe_allow_html=True
         )
+
     elif archivo_doc and not fecha_oficio:
 
         st.warning(
