@@ -656,6 +656,7 @@ if menu == "📎 Documentos":
 
         archivo_url = (
             resultado["secure_url"]
+	    + "?dl=1"
         )
         st.write(resultado)
 
