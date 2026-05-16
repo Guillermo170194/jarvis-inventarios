@@ -1,6 +1,3 @@
-import cloudinary
-
-import cloudinary.uploader
 
 from google.oauth2 import service_account
 
@@ -36,17 +33,6 @@ drive_service = build(
     "drive",
     "v3",
     credentials=credentials
-)
-cloudinary.config(
-    cloud_name=os.environ[
-        "CLOUDINARY_CLOUD_NAME"
-    ],
-    api_key=os.environ[
-        "CLOUDINARY_API_KEY"
-    ],
-    api_secret=os.environ[
-        "CLOUDINARY_API_SECRET"
-    ]
 )
 
 from datetime import datetime
@@ -645,25 +631,40 @@ if menu == "📎 Documentos":
             + nombre_original
         )
 
-        resultado = (
-            cloudinary.uploader.upload(
-                archivo_doc,
-                resource_type="auto",
-                folder="jarvis_documentos",
-                public_id=nombre
-            )
+        carpeta_destino = os.path.join(
+            "documentos",
+            entidad_doc,
+            clues_doc
         )
 
-        archivo_url = resultado["secure_url"]
+        os.makedirs(
+            carpeta_destino,
+            exist_ok=True
+        )
+
+        ruta_archivo = os.path.join(
+            carpeta_destino,
+            nombre
+        )
+
+        with open(
+            ruta_archivo,
+            "wb"
+        ) as f:
+
+            f.write(
+                archivo_doc.getbuffer()
+            )
 
         st.success(
-            "✅ Documento cargado correctamente"
+            "✅ Documento guardado correctamente"
         )
 
-        st.write("📂 Documento disponible:")
+        st.write("📂 Archivo guardado:")
 
-        st.write(archivo_url)
-
+        st.code(
+            ruta_archivo
+        )
     elif archivo_doc and not fecha_oficio:
 
         st.warning(
