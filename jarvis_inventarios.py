@@ -756,15 +756,20 @@ if menu == "📎 Documentos":
                 "Tipo": tipo_doc,
                 "Fecha oficio": fecha_doc,
                 "Archivo": nombre,
-                "Ruta": ruta_archivo
+                "Ruta": ruta_archivo,
+                "Preview": preview_url
             }
         ])
         if preview_url:
 
-            st.image(
-                preview_url,
-                caption="Vista previa documento"
-            )
+            if st.button(
+                "👁 Vista previa"
+            ):
+
+                st.image(
+                    preview_url,
+                    caption="Vista previa documento"
+                )
         if os.path.exists(
             REGISTRO_DOCS
         ):
