@@ -654,13 +654,9 @@ if menu == "📎 Documentos":
             )
         )
 
-        archivo_url = (
-            resultado["secure_url"]
-            .replace(
-                "/upload/",
-                "/upload/fl_attachment/"
-            )
-        )
+        archivo_url = resultado[
+            "secure_url"
+        ]
 
         st.success(
             "✅ Documento cargado correctamente"
@@ -669,7 +665,7 @@ if menu == "📎 Documentos":
         st.markdown(
             f"""
             <a href="{archivo_url}" target="_blank">
-                📂 Descargar documento
+                📂 Abrir documento
             </a>
             """,
             unsafe_allow_html=True
