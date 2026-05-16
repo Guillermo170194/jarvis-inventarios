@@ -28,14 +28,17 @@ FOLDER_ID = "1vMT6gXgMU4TymjXiodWgoJC5murwCFgI"
 # CREDENCIALES
 # =========================
 
+google_credentials = json.loads(
+    os.environ["GOOGLE_CREDENTIALS"]
+)
+
 credentials = (
     service_account.Credentials
-    .from_service_account_file(
-        "credenciales.json",
+    .from_service_account_info(
+        google_credentials,
         scopes=SCOPES
     )
 )
-
 drive_service = build(
     "drive",
     "v3",
