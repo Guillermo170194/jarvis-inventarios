@@ -642,6 +642,9 @@ if menu == "📎 Documentos":
             "jpg"
         ]
     )
+
+    if archivo_doc and fecha_oficio:
+
         preview_url = ""
 
         if archivo_doc.name.lower().endswith(
@@ -679,8 +682,6 @@ if menu == "📎 Documentos":
             os.remove(
                 temp_img
             )
-
-    if archivo_doc and fecha_oficio:
 
         nombre_limpio = (
             tipo_doc
