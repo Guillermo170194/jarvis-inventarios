@@ -30,16 +30,10 @@ FOLDER_ID = (
 )
 import json
 
-google_credentials = json.loads(
-    os.environ[
-        "GOOGLE_CREDENTIALS"
-    ]
-)
-
 credentials = (
     service_account.Credentials
-    .from_service_account_info(
-        google_credentials,
+    .from_service_account_file(
+        "credenciales.json",
         scopes=SCOPES
     )
 )
@@ -579,11 +573,69 @@ if menu == "📎 Documentos":
 
         st.session_state.ultimo_hash = ""
 
-
     st.markdown(
         "## 📎 Gestor documental"
     )
 
+    st.markdown("### 🧪 Prueba Google Drive")
+
+    archivo_test = st.file_uploader(
+        "Subir prueba Drive",
+        key="test_drive"
+    )
+
+    if archivo_test:
+
+        temp_path = os.path.join(
+            "/tmp",
+            archivo_test.name
+        )
+
+        with open(
+            temp_path,
+            "wb"
+        ) as f:
+
+            f.write(
+                archivo_test.getbuffer()
+            )
+
+        file_metadata = {
+            "name": archivo_test.name,
+            "parents": [FOLDER_ID]
+        }
+
+        media = MediaFileUpload(
+            temp_path,
+            resumable=True
+        )
+
+        uploaded_file = (
+            drive_service.files()
+            .create(
+                body=file_metadata,
+                media_body=media,
+                fields="id, webViewLink"
+            )
+            .execute()
+        )
+
+        drive_link = uploaded_file[
+            "webViewLink"
+        ]
+
+        st.success(
+            "✅ Archivo subido a Google Drive"
+        )
+
+        st.write(drive_link)
+
+        st.link_button(
+            "📂 Abrir en Drive",
+            drive_link
+        )
+
+        os.remove(temp_path)
     # =========================
     # FILTROS
     # =========================
@@ -648,6 +700,9 @@ if menu == "📎 Documentos":
             "jpg"
         ]
     )
+    cargar_doc = st.button(
+        "📤 Cargar información"
+    )
     archivo_hash = ""
 
     if archivo_doc:
@@ -657,7 +712,8 @@ if menu == "📎 Documentos":
         ).hexdigest()
 
     if (
-        archivo_doc
+        cargar_doc
+        and archivo_doc
         and fecha_oficio
         and st.session_state.ultimo_hash
         != archivo_hash
@@ -815,6 +871,7 @@ if menu == "📎 Documentos":
         st.session_state.ultimo_hash = (
             archivo_hash
         )
+        st.rerun()
     st.markdown(
         "## 📚 Expediente documental"
     )
@@ -832,65 +889,111 @@ if menu == "📎 Documentos":
             == clues_doc
         ]
 
-        if len(historial_docs) > 0:
+if len(historial_docs) > 0:
 
-            st.dataframe(
-                historial_docs,
-                use_container_width=True,
-                hide_index=True
+    st.dataframe(
+        historial_docs,
+        use_container_width=True,
+        hide_index=True
+    ):
+
+    historial_docs = pd.read_excel(
+        REGISTRO_DOCS
+    )
+
+    historial_docs = historial_docs[
+        historial_docs["CLUES"]
+        == clues_doc
+    ]
+
+    if len(historial_docs) > 0:
+
+        st.dataframe(
+            historial_docs,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        for i, row in historial_docs.iterrows():
+
+            c1, c2 = st.columns([8,1])
+
+with c1:
+
+    st.write(row["Ruta"])
+
+    if os.path.exists(row["Ruta"]):
+
+        with open(
+            row["Ruta"],
+            "rb"
+        ) as file:
+
+            st.download_button(
+                label=f"📂 {row['Archivo']}",
+                data=file,
+                file_name=row["Archivo"],
+                mime=None,
+                key=f"down_{i}"
             )
 
-            for i, row in historial_docs.iterrows():
-
-                c1, c2 = st.columns([8,1])
-
-                with c1:
-
-                    with open(
-                        row["Ruta"],
-                        "rb"
-                    ) as file:
-
-                        st.download_button(
-                            label=f"📂 {row['Archivo']}",
-                            data=file,
-                            file_name=row["Archivo"],
-                            mime="application/pdf",
-                            key=f"down_{i}"
-                        )
-
-                with c2:
-
-                    if st.button(
-                        "🗑",
-                        key=f"del_{i}"
-                    ):
-
-                        if os.path.exists(
-                            row["Ruta"]
-                        ):
-
-                            os.remove(
-                                row["Ruta"]
-                            )
-
-                        historial_docs = historial_docs.drop(i)
-
-                        historial_docs.to_excel(
-                            REGISTRO_DOCS,
-                            index=False
-                        )
-
-                        st.success(
-                            "Documento eliminado."
-                        )
-
-                        st.session_state.ultimo_hash = ""
-
-                        st.rerun()
-
-    elif archivo_doc and not fecha_oficio:
+    else:
 
         st.warning(
-            "⚠ Selecciona la fecha del oficio."
+            f"⚠ Archivo no encontrado: {row['Archivo']}"
         )
+
+    if row["Preview"]:
+
+        if st.button(
+            "👁",
+            key=f"prev_{i}"
+        ):
+
+            st.image(
+                row["Preview"]
+            )
+            with c2:
+
+                if st.button(
+                    "🗑",
+                    key=f"del_{i}"
+                ):
+
+                    if os.path.exists(
+                        row["Ruta"]
+                    ):
+
+                        os.remove(
+                            row["Ruta"]
+                        )
+
+                    historial_total = pd.read_excel(
+                        REGISTRO_DOCS
+                    )
+
+                    historial_total = historial_total.drop(i)
+
+                    historial_total.to_excel(
+                        REGISTRO_DOCS,
+                        index=False
+                    )
+
+                    st.success(
+                        "Documento eliminado."
+                    )
+
+                    st.session_state.ultimo_hash = ""
+
+                    st.rerun()
+
+    else:
+
+        st.info(
+            "No hay documentos cargados."
+        )
+if archivo_doc and not fecha_oficio:
+
+    st.warning(
+        "⚠ Selecciona la fecha del oficio."
+    )
