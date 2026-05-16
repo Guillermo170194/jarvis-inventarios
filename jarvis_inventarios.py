@@ -666,14 +666,14 @@ if menu == "📎 Documentos":
             "✅ Documento cargado correctamente"
         )
 
-	st.markdown(
-	    f"""
-	    <a href="{archivo_url}" target="_blank">
-	        📂 Descargar documento
-	    </a>
-	    """,
-	    unsafe_allow_html=True
-	)
+        st.markdown(
+            f"""
+            <a href="{archivo_url}" target="_blank">
+                📂 Descargar documento
+            </a>
+            """,
+            unsafe_allow_html=True
+        )
 	    elif archivo_doc and not fecha_oficio:
 
         st.warning(
