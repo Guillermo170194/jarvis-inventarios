@@ -26,14 +26,18 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive"
 ]
 FOLDER_ID = (
-    "1vMT6gXgMU4TymjXiodWgoJC5murwCFgI"
+    "1z6SPpWh-ds6Gn8BmSy15HnBicISEdnI5"
 )
 import json
 
+google_credentials = json.loads(
+    os.environ["GOOGLE_CREDENTIALS"]
+)
+
 credentials = (
     service_account.Credentials
-    .from_service_account_file(
-        "credenciales.json",
+    .from_service_account_info(
+        google_credentials,
         scopes=SCOPES
     )
 )
@@ -615,7 +619,8 @@ if menu == "📎 Documentos":
             .create(
                 body=file_metadata,
                 media_body=media,
-                fields="id, webViewLink"
+                fields="id, webViewLink",
+                supportsAllDrives=True
             )
             .execute()
         )
