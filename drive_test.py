@@ -22,7 +22,9 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-FOLDER_ID = "1vMT6gXgMU4TymjXiodWgoJC5murwCFgI"
+FOLDER_ID = (
+    "1T_FDDpwvm-XhFVpwWwH_chbOMDxSBgKR"
+)
 
 # =========================
 # CREDENCIALES
@@ -86,7 +88,8 @@ if archivo:
         .create(
             body=file_metadata,
             media_body=media,
-            fields="id, webViewLink"
+            fields="id, webViewLink",
+            supportsAllDrives=True
         )
         .execute()
     )
@@ -119,7 +122,9 @@ results = (
     .list(
         q=f"'{FOLDER_ID}' in parents and trashed=false",
         pageSize=10,
-        fields="files(id, name, webViewLink)"
+        fields="files(id, name, webViewLink)",
+        supportsAllDrives=True,
+        includeItemsFromAllDrives=True
     )
     .execute()
 )
