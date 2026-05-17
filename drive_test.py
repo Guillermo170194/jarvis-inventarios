@@ -23,9 +23,8 @@ SCOPES = [
 ]
 
 FOLDER_ID = (
-    "1T_FDDpwvm-XhFVpwWwH_chbOMDxSBgKR"
+    "1z6SPpWh-ds6Gn8BmSy15HnBicISEdnI5"
 )
-
 # =========================
 # CREDENCIALES
 # =========================
